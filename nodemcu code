@@ -1,0 +1,39 @@
+//Libraries to create a local server by nodemcu or esp8266
+#include <ESP8266WiFi.h>
+#include <ESPAsyncTCP.h>
+#include <ESPAsyncWebSrv.h>
+
+//Name your nodemcu hotspot name and set the password
+const char* ssid = "your-ssid";
+const char* password = "your-password";
+AsyncWebServer server(80);
+
+double TDS = 452.0;
+double pH = 7.5;
+double Status = 1.0;
+
+void setup() {
+  Serial.begin(9600);
+  // Set up GPIO pins, etc. 
+  WiFi.softAP(ssid, password);
+
+  Serial.println("AP IP Address: ");
+  Serial.println(WiFi.softAPIP());
+  // Add handlers for incoming HTTP requests
+  server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
+    double myArray[3] = {TDS, pH, Status}; // example array of size 3
+    String response = String(myArray[0]) + "," + String(myArray[1]) + "," + String(myArray[2]);
+    request->send(200, "text/plain", response);
+  });
+  
+  // Start the server
+  server.begin();
+}
+
+void loop() {
+  //Here I have put random sensor values to test the code then put the sensor reading code here
+  TDS = random(200, 900);
+  pH = random(5, 9);
+  Status = random(0, 3);
+  delay(4000);
+}
